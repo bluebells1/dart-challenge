@@ -131,10 +131,11 @@
     .resultTop{
       display:flex;
       justify-content:space-between;
-      align-items:center;
+      align-items:flex-start;
       gap:10px;
       color:var(--muted);
-      font-size:12px;
+      font-size:18px;
+      font-weight:bold;
     }
     .chips{display:flex; gap:10px;}
     .chip{
@@ -193,6 +194,13 @@
     }
     .switch:checked{background: rgba(62,231,196,.28); border-color: rgba(62,231,196,.35);}
     .switch:checked::after{left:22px; background: rgba(255,255,255,.95);}
+    .switch:disabled{
+      opacity:.5;
+      cursor:not-allowed;
+    }
+    .opt.disabled{
+      opacity:.6;
+    }
 
     .actions{
       margin-top:10px;
@@ -249,7 +257,9 @@
       cursor:pointer;
       list-style:none;
       padding:12px 14px;
-      font-weight:950;
+      font-weight:bold;
+      font-size:18px;
+      color:var(--muted);
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -342,15 +352,15 @@
           <div class="bot">Welcome to your dart challenge generator.</div>
           <div class="bot">Track hits or misses and switch between easy and hard mode.</div>
         </div>
-        <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
-          <div class="pill" id="modePill">Mode: Easy</div>
-          <div class="tag">Streak: <span id="streak">0</span></div>
-        </div>
       </header>
 
       <div class="result" aria-live="polite">
         <div class="resultTop">
           <span>Current targets</span>
+          <div style="display:flex; flex-direction:row; gap:6px; align-items:center;">
+            <div class="pill" id="modePill">Mode: Easy</div>
+            <div class="pill">Streak: <span id="streak">0</span></div>
+          </div>
         </div>
         <div class="chips" id="chips"></div>
 
@@ -403,7 +413,7 @@
       </details>
 
       <div class="foot">
-        Install tip: open in Safari → Share → Add to Home Screen. Works offline after first load.
+        Install tip: open in Chrome → Menu (⋮) → Add to Home screen. Works offline after first load.
       </div>
     </div>
   </div>
@@ -531,6 +541,17 @@
         $('modePill').textContent = 'Mode: ' + modeText;
         $('modeBtn').textContent = mode==='easy' ? 'Hard' : 'Easy';
         $('streak').textContent = String(streak);
+        
+        // Disable spicy toggle when in easy mode
+        const spicyInput = $('spicy');
+        const spicyOpt = spicyInput.closest('.opt');
+        if(mode==='easy'){
+          spicyInput.disabled = true;
+          spicyOpt?.classList.add('disabled');
+        } else {
+          spicyInput.disabled = false;
+          spicyOpt?.classList.remove('disabled');
+        }
 
         const chips = $('chips');
         chips.innerHTML = '';
