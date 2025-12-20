@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <title>Dart Challenge</title>
+  <style>
+    :root{
+      --bg1:#0b1020;
+      --bg2:#121a33;
+      --text:#eaf0ff;
+      --muted:#a8b3d6;
+      --accent:#7c5cff;
+      --accent2:#3ee7c4;
+      --warn:#ffcf5c;
+      --shadow: 0 18px 55px rgba(0,0,0,.45);
+      --radius: 18px;
+      --stroke: rgba(255,255,255,.10);
+      --panel: rgba(0,0,0,.18);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 10% 0%, rgba(124,92,255,.35), transparent 55%),
+        radial-gradient(900px 700px at 90% 10%, rgba(62,231,196,.25), transparent 55%),
+        radial-gradient(800px 700px at 50% 100%, rgba(255,207,92,.10), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100svh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+    .card{
+      width:min(720px, 100%);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      overflow:hidden;
+      position:relative;
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(700px 220px at 20% 0%, rgba(124,92,255,.22), transparent 60%),
+                  radial-gradient(700px 220px at 80% 10%, rgba(62,231,196,.16), transparent 60%);
+      pointer-events:none;
+    }
+    .inner{position:relative; padding:16px;}
+    header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+    }
+    h1{margin:0; font-size:18px; letter-spacing:.2px; line-height:1.2;}
+    .sub{color:var(--muted); font-size:12px; line-height:1.35;}
+    .pill{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--muted);
+      font-size:12px;
+      user-select:none;
+      white-space:nowrap;
+      background: rgba(0,0,0,.12);
+    }
+
+    .banner{
+      margin-top:8px;
+      padding:12px 12px;
+      border-radius: var(--radius);
+      border:1px solid var(--stroke);
+      background: linear-gradient(135deg, rgba(255,207,92,.15), rgba(255,255,255,.04));
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .greet{display:flex; flex-direction:column; gap:2px; min-width:0;}
+    .greet .top{
+      font-weight:950;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .greet .bot{color:var(--muted); font-size:12px;}
+    .hat{width:22px;height:22px;flex:0 0 auto;filter: drop-shadow(0 10px 18px rgba(0,0,0,.25));}
+    .tree{font-size:18px;margin-left:2px;}
+    .tag{
+      font-size:11px;
+      padding:6px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--muted);
+      background: rgba(0,0,0,.16);
+      white-space:nowrap;
+    }
+
+    .result{
+      margin-top:12px;
+      padding:14px;
+      border-radius: var(--radius);
+      border:1px solid var(--stroke);
+      background: var(--panel);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .resultTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .chips{
+      display:flex;
+      gap:10px;
+    }
+    .chip{
+      flex:1;
+      padding:16px 10px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      font-weight:950;
+      font-size:22px;
+      letter-spacing:.3px;
+      text-align:center;
+      min-width: 88px;
+    }
+    .chip.special{
+      background: linear-gradient(135deg, rgba(255,207,92,.22), rgba(255,255,255,.05));
+      border-color: rgba(255,207,92,.28);
+    }
+
+    .opts{
+      margin-top:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .opt{
+      flex:1;
+      min-width: 240px;
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.14);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .opt .txt{display:flex; flex-direction:column; gap:1px; min-width:0;}
+    .opt .t1{font-size:12px; font-weight:900;}
+    .opt .t2{font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .switch{
+      width:46px; height:26px; appearance:none; border-radius:999px;
+      background: rgba(255,255,255,.12);
+      outline:none; border:1px solid rgba(255,255,255,.10);
+      position:relative; cursor:pointer; transition:.15s ease;
+      flex:0 0 auto;
+    }
+    .switch::after{
+      content:"";
+      width:20px; height:20px; border-radius:50%;
+      background: rgba(255,255,255,.85);
+      position:absolute; top:2px; left:2px;
+      transition:.15s ease;
+    }
+    .switch:checked{background: rgba(62,231,196,.28); border-color: rgba(62,231,196,.35);}
+    .switch:checked::after{left:22px; background: rgba(255,255,255,.95);}
+
+    .actions{
+      margin-top:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      border:1px solid rgba(255,255,255,.12);
+      cursor:pointer;
+      border-radius: 14px;
+      padding:12px 14px;
+      font-weight:950;
+      letter-spacing:.2px;
+      transition:.15s ease;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      user-select:none;
+      background: rgba(0,0,0,.18);
+      color:var(--text);
+      flex:1;
+      min-width: 120px;
+    }
+    .btn.hit{
+      color:#071022;
+      background: linear-gradient(135deg, rgba(62,231,196,1), rgba(255,255,255,.88));
+      border:0;
+      box-shadow: 0 18px 40px rgba(62,231,196,.12);
+    }
+    .btn.miss{
+      color:#071022;
+      background: linear-gradient(135deg, rgba(255,207,92,1), rgba(255,255,255,.88));
+      border:0;
+      box-shadow: 0 18px 40px rgba(255,207,92,.12);
+    }
+    .btn.mode{
+      color:#071022;
+      background: linear-gradient(135deg, rgba(124,92,255,1), rgba(62,231,196,1));
+      border:0;
+      box-shadow: 0 18px 40px rgba(124,92,255,.14);
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    details{
+      margin-top:10px;
+      border:1px solid var(--stroke);
+      border-radius: var(--radius);
+      background: rgba(0,0,0,.14);
+      overflow:hidden;
+    }
+    summary{
+      cursor:pointer;
+      list-style:none;
+      padding:12px 14px;
+      font-weight:950;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    summary::-webkit-details-marker{display:none;}
+    .history{
+      padding:0 14px 14px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .daily{
+      margin-top:10px;
+      padding:12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.14);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .daily .left{display:flex; flex-direction:column; gap:2px;}
+    .daily .t1{font-weight:950; font-size:12px;}
+    .daily .t2{color:var(--muted); font-size:12px;}
+    .daily .big{
+      font-weight:950;
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      color: var(--text);
+      white-space:nowrap;
+    }
+
+    .item{
+      padding:12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.14);
+    }
+    .topRow{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px;}
+    .vals{display:flex; flex-wrap:wrap; gap:8px;}
+    .mini{
+      padding:8px 10px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      font-weight:900;
+    }
+    .foot{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.35;
+    }
+    .toast{
+      position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+      background: rgba(15,23,48,.95); border: 1px solid rgba(255,255,255,.12);
+      color: var(--text); padding: 10px 12px; border-radius: 999px; box-shadow: 0 16px 45px rgba(0,0,0,.45);
+      font-size: 13px; opacity: 0; pointer-events:none; transition: .18s ease;
+    }
+    .toast.show{ opacity:1; }
+
+    @media (max-width: 420px){
+      .chip{font-size:20px; padding:14px 8px;}
+      .btn{padding:12px 12px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="inner">
+      <header>
+        <div>
+          <h1>Dart Challenge Generator</h1>
+          <div class="sub">Hit or miss the current set. Switch mode anytime.</div>
+        </div>
+        <div class="pill" id="modePill">Mode: Easy</div>
+      </header>
+
+      <div class="banner">
+        <div class="greet">
+          <div class="top">
+            <svg class="hat" viewBox="0 0 64 64" aria-hidden="true">
+              <path d="M8 40c14-20 33-25 48-18 4 2 7 6 6 10-2 6-12 9-25 9H8z" fill="#d83434"/>
+              <path d="M8 40h42c3 0 6 3 6 6v2c0 4-3 6-6 6H14c-4 0-6-3-6-6v-8z" fill="#f2f2f2" opacity=".95"/>
+              <circle cx="56" cy="28" r="6" fill="#f2f2f2"/>
+            </svg>
+            <span id="greetingText">Merry Christmas, Patsy!</span>
+            <span class="tree" aria-hidden="true">🎄</span>
+          </div>
+          <div class="bot">A custom dart challenge app, made just for you.</div>
+        </div>
+        <div class="tag">Streak: <span id="streak">0</span></div>
+      </div>
+
+      <div class="result" aria-live="polite">
+        <div class="resultTop">
+          <span>Current targets</span>
+          <span class="tag" id="currentMeta">Easy</span>
+        </div>
+        <div class="chips" id="chips"></div>
+
+        <div class="opts" aria-label="Options">
+          <div class="opt">
+            <div class="txt">
+              <div class="t1">Unique targets</div>
+              <div class="t2">No repeats within a set</div>
+            </div>
+            <input id="noRepeats" class="switch" type="checkbox" checked />
+          </div>
+
+          <div class="opt">
+            <div class="txt">
+              <div class="t1">Hard mix: Spicy</div>
+              <div class="t2">More doubles & triples</div>
+            </div>
+            <input id="spicy" class="switch" type="checkbox" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn hit" id="hitBtn">Hit</button>
+          <button class="btn miss" id="missBtn">Miss</button>
+          <button class="btn mode" id="modeBtn">Hard</button>
+        </div>
+      </div>
+
+      <details>
+        <summary>
+          <span>Recent results</span>
+          <span class="tag">Today summary inside</span>
+        </summary>
+
+        <div class="history" style="padding-bottom:0;">
+          <div class="daily" id="dailyCard">
+            <div class="left">
+              <div class="t1">Today</div>
+              <div class="t2" id="dailyLine">0 / 0 hits (0%)</div>
+            </div>
+            <div class="big" id="dailyPct">0%</div>
+          </div>
+        </div>
+
+        <div class="history" id="history"></div>
+
+        <div class="history" style="padding-top:0;">
+          <button class="btn" id="clearBtn" style="min-width:0; width:100%;">Clear history</button>
+        </div>
+      </details>
+
+      <div class="foot">
+        Install tip: open in Safari → Share → Add to Home Screen. Works offline after first load.
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Saved</div>
+
+  <script>
+    (function(){
+      const $ = (id)=>document.getElementById(id);
+
+      // ===== Customisation =====
+      const RECIPIENT_NAME = "Patsy";
+      $('greetingText').textContent = `Merry Christmas, ${RECIPIENT_NAME}!`;
+
+      // ===== Storage =====
+      const STORAGE_KEY = 'dart_gen_3btn_daily_v1';
+      const MAX_HISTORY = 10;
+
+      let mode = 'easy';
+      let current = [];
+      let currentMode = 'easy';
+      let streak = 0;
+      let history = [];
+
+      // Daily summary
+      let dayKey = '';
+      let hitsToday = 0;
+      let attemptsToday = 0;
+
+      function getLocalDayKey(){
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth()+1).padStart(2,'0');
+        const da = String(d.getDate()).padStart(2,'0');
+        return `${y}-${m}-${da}`;
+      }
+
+      function ensureToday(){
+        const k = getLocalDayKey();
+        if(dayKey !== k){
+          dayKey = k;
+          hitsToday = 0;
+          attemptsToday = 0;
+        }
+      }
+
+      function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+      function toastMsg(msg){
+        const t = $('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(()=>t.classList.remove('show'), 950);
+      }
+
+      function tokenShort(tok){
+        if(tok.kind==='S') return String(tok.n);
+        if(tok.kind==='D') return 'D'+tok.n;
+        if(tok.kind==='T') return 'T'+tok.n;
+        if(tok.kind==='BULL') return 'Bull';
+        if(tok.kind==='DBULL') return 'Bullseye';
+        return '—';
+      }
+      function hardKey(tok){
+        if(tok.kind==='S') return 'S'+tok.n;
+        if(tok.kind==='D') return 'D'+tok.n;
+        if(tok.kind==='T') return 'T'+tok.n;
+        if(tok.kind==='BULL') return 'BULL';
+        if(tok.kind==='DBULL') return 'DBULL';
+        return 'X';
+      }
+
+      function makeEasySet(){
+        const unique = $('noRepeats').checked;
+        if(unique){
+          const nums = new Set();
+          while(nums.size < 3) nums.add(randInt(1,20));
+          return [...nums].slice(0,3).map(n=>({kind:'S', n}));
+        }
+        return [0,0,0].map(()=>({kind:'S', n:randInt(1,20)}));
+      }
+
+      function makeHardToken(){
+        const spicyOn = $('spicy').checked;
+        const weights = spicyOn
+          ? [{k:'S',w:22},{k:'D',w:35},{k:'T',w:33},{k:'BULL',w:7},{k:'DBULL',w:3}]
+          : [{k:'S',w:45},{k:'D',w:25},{k:'T',w:20},{k:'BULL',w:7},{k:'DBULL',w:3}];
+
+        const total = weights.reduce((a,b)=>a+b.w,0);
+        let r = Math.random()*total;
+        for(const it of weights){
+          r -= it.w;
+          if(r<=0){
+            if(it.k==='BULL') return {kind:'BULL'};
+            if(it.k==='DBULL') return {kind:'DBULL'};
+            return {kind:it.k, n:randInt(1,20)};
+          }
+        }
+        return {kind:'S', n:randInt(1,20)};
+      }
+
+      function makeHardSet(){
+        const unique = $('noRepeats').checked;
+        const out=[]; const seen=new Set();
+        let guard=0;
+        while(out.length<3 && guard<500){
+          guard++;
+          const tok = makeHardToken();
+          const key = hardKey(tok);
+          if(unique && seen.has(key)) continue;
+          if(unique) seen.add(key);
+          out.push(tok);
+        }
+        while(out.length<3) out.push({kind:'S', n:randInt(1,20)});
+        return out;
+      }
+
+      function renderDaily(){
+        ensureToday();
+        const pct = attemptsToday > 0 ? Math.round((hitsToday/attemptsToday)*100) : 0;
+        $('dailyLine').textContent = `${hitsToday} / ${attemptsToday} hits (${pct}%)`;
+        $('dailyPct').textContent = `${pct}%`;
+      }
+
+      function renderCurrent(){
+        $('modePill').textContent = 'Mode: ' + (mode==='easy'?'Easy':'Hard');
+        $('modeBtn').textContent = mode==='easy' ? 'Hard' : 'Easy';
+        $('currentMeta').textContent = (currentMode==='easy') ? 'Easy' : ( $('spicy').checked ? 'Hard • Spicy' : 'Hard' );
+        $('streak').textContent = String(streak);
+
+        const chips = $('chips');
+        chips.innerHTML = '';
+        for(const tok of current){
+          const d = document.createElement('div');
+          d.className = 'chip' + ((tok.kind==='BULL'||tok.kind==='DBULL') ? ' special' : '');
+          d.textContent = tokenShort(tok);
+          chips.appendChild(d);
+        }
+      }
+
+      function generate(){
+        currentMode = mode;
+        current = (mode==='easy') ? makeEasySet() : makeHardSet();
+        renderCurrent();
+        save();
+      }
+
+      function fmtTime(ts){
+        const d=new Date(ts);
+        return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      }
+
+      function renderHistory(){
+        const el = $('history');
+        el.innerHTML = '';
+        if(history.length === 0){
+          const empty = document.createElement('div');
+          empty.className = 'item';
+          empty.innerHTML = '<div class="sub">No results yet. Throw, then tap Hit or Miss.</div>';
+          el.appendChild(empty);
+          return;
+        }
+        for(const h of history){
+          const item = document.createElement('div');
+          item.className = 'item';
+          const modeLabel = h.mode==='easy' ? 'Easy' : 'Hard';
+          item.innerHTML = `
+            <div class="topRow">
+              <span class="tag">${modeLabel}</span>
+              <span class="tag">${fmtTime(h.ts)} • ${h.res}</span>
+            </div>
+            <div class="vals">${h.vals.map(v=>`<span class="mini">${v}</span>`).join('')}</div>
+          `;
+          el.appendChild(item);
+        }
+      }
+
+      function record(res){
+        ensureToday();
+        attemptsToday += 1;
+        if(res === '✅') hitsToday += 1;
+
+        const vals = current.map(tokenShort);
+        history.unshift({ vals, res, mode: currentMode, ts: Date.now() });
+        history = history.slice(0, MAX_HISTORY);
+
+        if(res === '✅') streak += 1;
+        else streak = 0;
+
+        save();
+        renderDaily();
+        renderHistory();
+
+        generate();
+        toastMsg('Saved');
+      }
+
+      function load(){
+        try{
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if(!raw) return;
+          const data = JSON.parse(raw);
+          if(data.mode==='easy'||data.mode==='hard') mode = data.mode;
+          if(typeof data.noRepeats==='boolean') $('noRepeats').checked = data.noRepeats;
+          if(typeof data.spicy==='boolean') $('spicy').checked = data.spicy;
+          if(typeof data.streak==='number') streak = data.streak;
+          if(Array.isArray(data.history)) history = data.history;
+
+          if(typeof data.dayKey === 'string') dayKey = data.dayKey;
+          if(typeof data.hitsToday === 'number') hitsToday = data.hitsToday;
+          if(typeof data.attemptsToday === 'number') attemptsToday = data.attemptsToday;
+
+          ensureToday();
+        }catch(e){}
+      }
+
+      function save(){
+        try{
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            mode,
+            noRepeats: $('noRepeats').checked,
+            spicy: $('spicy').checked,
+            streak,
+            history,
+            dayKey,
+            hitsToday,
+            attemptsToday
+          }));
+        }catch(e){}
+      }
+
+      $('hitBtn').addEventListener('click', ()=>record('✅'));
+      $('missBtn').addEventListener('click', ()=>record('❌'));
+      $('modeBtn').addEventListener('click', ()=>{
+        mode = (mode==='easy') ? 'hard' : 'easy';
+        generate();
+      });
+      $('noRepeats').addEventListener('change', ()=>{ save(); generate(); });
+      $('spicy').addEventListener('change', ()=>{ save(); if(mode==='hard') generate(); else renderCurrent(); });
+
+      $('clearBtn').addEventListener('click', ()=>{
+        history = [];
+        streak = 0;
+        dayKey = getLocalDayKey();
+        hitsToday = 0;
+        attemptsToday = 0;
+
+        save();
+        renderDaily();
+        renderHistory();
+        renderCurrent();
+        toastMsg('Cleared');
+      });
+
+      load();
+      renderDaily();
+      renderHistory();
+      generate();
+
+      if('serviceWorker' in navigator){
+        navigator.serviceWorker.register('sw.js').catch(()=>{});
+      }
+    })();
+  </script>
+</body>
+</html>
