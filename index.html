@@ -227,17 +227,29 @@
       flex:1;
       min-width: 120px;
     }
-    .btn.hit{
+    .btn.score{
       color:#071022;
-      background: linear-gradient(135deg, rgba(62,231,196,1), rgba(255,255,255,.88));
+      background: linear-gradient(135deg, rgba(124,92,255,.85), rgba(62,231,196,.85));
       border:0;
+      box-shadow: 0 18px 40px rgba(124,92,255,.12);
+      flex: 1;
+      min-width: 60px;
+    }
+    .btn.score[data-score="0"]{
+      background: linear-gradient(135deg, rgba(100,100,100,.6), rgba(150,150,150,.6));
+      box-shadow: 0 18px 40px rgba(0,0,0,.2);
+    }
+    .btn.score[data-score="1"]{
+      background: linear-gradient(135deg, rgba(255,207,92,.7), rgba(255,255,255,.7));
+      box-shadow: 0 18px 40px rgba(255,207,92,.12);
+    }
+    .btn.score[data-score="2"]{
+      background: linear-gradient(135deg, rgba(62,231,196,.8), rgba(255,255,255,.8));
       box-shadow: 0 18px 40px rgba(62,231,196,.12);
     }
-    .btn.miss{
-      color:#071022;
-      background: linear-gradient(135deg, rgba(255,207,92,1), rgba(255,255,255,.88));
-      border:0;
-      box-shadow: 0 18px 40px rgba(255,207,92,.12);
+    .btn.score[data-score="3"]{
+      background: linear-gradient(135deg, rgba(62,231,196,1), rgba(255,255,255,.88));
+      box-shadow: 0 18px 40px rgba(62,231,196,.2);
     }
     .btn.mode{
       color:#071022;
@@ -384,8 +396,10 @@
         </div>
 
         <div class="actions">
-          <button class="btn hit" id="hitBtn">Hit</button>
-          <button class="btn miss" id="missBtn">Miss</button>
+          <button class="btn score" data-score="0" id="score0">0</button>
+          <button class="btn score" data-score="1" id="score1">1</button>
+          <button class="btn score" data-score="2" id="score2">2</button>
+          <button class="btn score" data-score="3" id="score3">3</button>
           <button class="btn mode" id="modeBtn">Hard</button>
         </div>
       </div>
@@ -441,8 +455,8 @@
 
       // Daily summary
       let dayKey = '';
-      let hitsToday = 0;
-      let attemptsToday = 0;
+      let hitsToday = 0; // Total hits across all rounds
+      let attemptsToday = 0; // Number of rounds
 
       function getLocalDayKey(){
         const d = new Date();
@@ -532,8 +546,10 @@
 
       function renderDaily(){
         ensureToday();
-        const pct = attemptsToday > 0 ? Math.round((hitsToday/attemptsToday)*100) : 0;
-        $('dailyLine').textContent = `${hitsToday} / ${attemptsToday} hits (${pct}%)`;
+        const totalPossible = attemptsToday * 3;
+        const pct = totalPossible > 0 ? Math.round((hitsToday/totalPossible)*100) : 0;
+        const avg = attemptsToday > 0 ? (hitsToday / attemptsToday).toFixed(1) : '0.0';
+        $('dailyLine').textContent = `${hitsToday} / ${totalPossible} hits • Avg: ${avg}/3`;
         $('dailyPct').textContent = `${pct}%`;
       }
 
@@ -582,7 +598,7 @@
         if(history.length === 0){
           const empty = document.createElement('div');
           empty.className = 'item';
-          empty.innerHTML = '<div style="color: var(--muted); font-size:12px; line-height:1.35;">No results yet. Throw, then tap Hit or Miss.</div>';
+          empty.innerHTML = '<div style="color: var(--muted); font-size:12px; line-height:1.35;">No results yet. Throw, then select your score (0-3).</div>';
           el.appendChild(empty);
           return;
         }
@@ -590,10 +606,11 @@
           const item = document.createElement('div');
           item.className = 'item';
           const modeLabel = h.mode==='easy' ? 'Easy' : 'Hard';
+          const scoreText = typeof h.score === 'number' ? `${h.score}/3` : h.res;
           item.innerHTML = `
             <div class="topRow">
               <span class="tag">${modeLabel}</span>
-              <span class="tag">${fmtTime(h.ts)} • ${h.res}</span>
+              <span class="tag">${fmtTime(h.ts)} • ${scoreText}</span>
             </div>
             <div class="vals">${h.vals.map(v=>`<span class="mini">${v}</span>`).join('')}</div>
           `;
@@ -601,16 +618,17 @@
         }
       }
 
-      function record(res){
+      function record(score){
         ensureToday();
         attemptsToday += 1;
-        if(res === '✅') hitsToday += 1;
+        hitsToday += score; // Add the score (0-3) to total hits
 
         const vals = current.map(tokenShort);
-        history.unshift({ vals, res, mode: currentMode, ts: Date.now() });
+        history.unshift({ vals, score, mode: currentMode, ts: Date.now() });
         history = history.slice(0, MAX_HISTORY);
 
-        if(res === '✅') streak += 1;
+        // Streak: consecutive rounds with at least 1 hit
+        if(score >= 1) streak += 1;
         else streak = 0;
 
         save();
@@ -630,7 +648,14 @@
           if(typeof data.noRepeats==='boolean') $('noRepeats').checked = data.noRepeats;
           if(typeof data.spicy==='boolean') $('spicy').checked = data.spicy;
           if(typeof data.streak==='number') streak = data.streak;
-          if(Array.isArray(data.history)) history = data.history;
+          if(Array.isArray(data.history)) {
+            // Convert old format (res: '✅'/'❌') to new format (score: 0-3)
+            history = data.history.map(h => {
+              if(typeof h.score === 'number') return h; // Already new format
+              if(h.res === '✅') return { ...h, score: 3, res: undefined };
+              return { ...h, score: 0, res: undefined };
+            });
+          }
 
           if(typeof data.dayKey === 'string') dayKey = data.dayKey;
           if(typeof data.hitsToday === 'number') hitsToday = data.hitsToday;
@@ -655,8 +680,10 @@
         }catch(e){}
       }
 
-      $('hitBtn').addEventListener('click', ()=>record('✅'));
-      $('missBtn').addEventListener('click', ()=>record('❌'));
+      // Score buttons (0, 1, 2, 3)
+      for(let i = 0; i <= 3; i++){
+        $(`score${i}`).addEventListener('click', ()=>record(i));
+      }
       $('modeBtn').addEventListener('click', ()=>{
         mode = (mode==='easy') ? 'hard' : 'easy';
         generate();
