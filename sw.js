@@ -1,4 +1,4 @@
-const CACHE = 'dart-challenge-v2';
+const CACHE = 'dart-challenge-v3';
 const ASSETS = [
   './',
   './index.html',
